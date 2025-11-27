@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rock Paper Scissors</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind (browser build) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="flex items-center justify-center min-h-screen bg-sky-500 p-4">
+
+  <!-- ==================== GAME CARD ==================== -->
+  <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 space-y-6">
+
+    <h1 class="text-2xl font-semibold text-gray-800 text-center">
+      Rock Paper Scissors
+    </h1>
+
+    <!-- ---------- SCORE BOARD ---------- -->
+    <div class="flex justify-around text-lg font-medium text-gray-700">
+      <span>Player: <span id="playerScore" class="font-bold">0</span></span>
+      <span>Computer: <span id="computerScore" class="font-bold">0</span></span>
+    </div>
+
+    <!-- ---------- CHOICE BUTTONS ---------- -->
+    <div id="choices"
+         class="flex flex-col sm:flex-row gap-4 justify-center">
+
+      <button data-choice="rock"
+              class="choice-btn flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-md transition-colors">
+        ✊ Rock
+      </button>
+
+      <button data-choice="paper"
+              class="choice-btn flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-md transition-colors">
+        ✋ Paper
+      </button>
+
+      <button data-choice="scissors"
+              class="choice-btn flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-md transition-colors">
+        ✌️ Scissors
+      </button>
+    </div>
+
+    <!-- ---------- RESULT MESSAGE ---------- -->
+    <div id="resultMessage"
+         class="text-center text-lg font-medium text-gray-800 h-10">
+      <!-- Filled by JavaScript -->
+    </div>
+
+    <!-- ---------- PLAY AGAIN BUTTON (appears after a round) ---------- -->
+    <button id="playAgainBtn"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-md transition-colors hidden">
+      Play Again
+    </button>
+  </div>
+
+  <!-- ==================== SCRIPT ==================== -->
+  <script>
+    // Grab DOM elements
+    const playerScoreEl   = document.getElementById('playerScore');
+    const computerScoreEl = document.getElementById('computerScore');
+    const resultMessage   = document.getElementById('resultMessage');
+    const playAgainBtn    = document.getElementById('playAgainBtn');
+    const choiceButtons   = document.querySelectorAll('.choice-btn');
+
+    let playerScore   = 0;
+    let computerScore = 0;
+
+    // Mapping of what beats what
+    const beats = {
+      rock:     'scissors',
+      paper:    'rock',
+      scissors: 'paper'
+    };
+
+    // Random computer choice
+    function randomChoice() {
+      const options = ['rock', 'paper', 'scissors'];
+      return options[Math.floor(Math.random() * options.length)];
+    }
+
+    // Update the scoreboard UI
+    function updateScoreboard() {
+      playerScoreEl.textContent   = playerScore;
+      computerScoreEl.textContent = computerScore;
+    }
+
+    // Display a friendly result message
+    function showResult(message, colourClass) {
+      resultMessage.textContent = message;
+      resultMessage.className = `text-center text-lg font-medium ${colourClass} h-10`;
+    }
+
+    // Core game logic – called when the player picks a move
+    function playRound(playerChoice) {
+      const computerChoice = randomChoice();
+
+      // Determine outcome
+      if (playerChoice === computerChoice) {
+        showResult("It's a tie! 🤝", 'text-gray-600');
+      } else if (beats[playerChoice] === computerChoice) {
+        playerScore++;
+        showResult(`You win! ${emoji(playerChoice)} beats ${emoji(computerChoice)} 🎉`,
+                   'text-green-600');
+      } else {
+        computerScore++;
+        showResult(`You lose! ${emoji(computerChoice)} beats ${emoji(playerChoice)} 😢`,
+                   'text-red-600');
+      }
+
+      updateScoreboard();
+      disableChoices();
+      playAgainBtn.classList.remove('hidden');
+    }
+
+    // Simple helper to turn a word into an emoji for nicer messages
+    function emoji(choice) {
+      switch (choice) {
+        case 'rock':     return '✊';
+        case 'paper':    return '✋';
+        case 'scissors': return '✌️';
+        default: return '';
+      }
+    }
+
+    // Disable the three choice buttons after a round
+    function disableChoices() {
+      choiceButtons.forEach(btn => btn.setAttribute('disabled', true));
+    }
+
+    // Re‑enable them for a new round
+    function enableChoices() {
+      choiceButtons.forEach(btn => btn.removeAttribute('disabled'));
+    }
+
+    // Attach click listeners to the choice buttons
+    choiceButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const playerChoice = btn.dataset.choice;
+        playRound(playerChoice);
+      });
+    });
+
+    // Play again resets UI for the next round
+    playAgainBtn.addEventListener('click', () => {
+      resultMessage.textContent = '';
+      playAgainBtn.classList.add('hidden');
+      enableChoices();
+    });
+  </script>
+</body>
+</html>
